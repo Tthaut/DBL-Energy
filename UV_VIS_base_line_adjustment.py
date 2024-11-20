@@ -26,7 +26,29 @@ def read_csv(path, base_line = False, base_line_path = None):
         data = np.genfromtxt(output_file, delimiter=";", dtype=None, names=True, encoding='ISO-8859-1')
         
         return data
+    
     elif base_line==True:
+        #done for base line
+        base_line_file = base_line_path
+        output_baseline_file = base_line_file.replace('.csv','_fixed.csv')
+        
+        with open(base_line_file, "r") as infile_base, open(output_baseline_file, "w") as outfile_base:
+            for i, line in enumerate(infile_base):
+                # For the first line, replace the first comma with a semicolon
+                if i == 0:
+                    line = line.replace(",", ";", 1)
+                    line = line.replace(' ', '',1)
+                else:
+                    # For other lines, replace the second comma with a semicolon
+                    parts = line.split(",")
+                    if len(parts) > 2:
+                        line = ",".join(parts[:2]) + ";" + ",".join(parts[2:])
+                        line = line.replace(' ', '',1)
+                        line = line.replace(',','.',2)
+                outfile_base.write(line)
+        
+        data_base = np.genfromtxt(output_baseline_file, delimiter=";", dtype = None, names=True, encoding='ISO-8859-1')
+
         input_file = path  # Original CSV file path
         output_file = path.replace('.csv','_fixed.csv')  # Fixed CSV file path
 
@@ -48,7 +70,9 @@ def read_csv(path, base_line = False, base_line_path = None):
 
         # Read the fixed CSV file using numpy
         data = np.genfromtxt(output_file, delimiter=";", dtype=None, names=True, encoding='ISO-8859-1')
-        return data
+
+        data_ad = data - data_base
+        return data_ad
 
 
 
