@@ -1,94 +1,62 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-def read_csv(path, base_line = False, base_line_path = None):
-    if base_line == False: 
-        input_file = path  # Original CSV file path
-        output_file = path.replace('.csv','_fixed.csv')  # Fixed CSV file path
 
+def read_csv(path, base_line=False, base_line_path=None):
+    def process_file(input_file, output_file):
         # Process the file to fix delimiters and remove commas in numbers
         with open(input_file, "r") as infile, open(output_file, "w") as outfile:
             for i, line in enumerate(infile):
                 # For the first line, replace the first comma with a semicolon
                 if i == 0:
                     line = line.replace(",", ";", 1)
-                    line = line.replace(' ', '',1)
+                    line = line.replace(' ', '', 1)
                 else:
                     # For other lines, replace the second comma with a semicolon
                     parts = line.split(",")
                     if len(parts) > 2:
                         line = ",".join(parts[:2]) + ";" + ",".join(parts[2:])
-                        line = line.replace(' ', '',1)
-                        line = line.replace(',','.',2)
+                        line = line.replace(' ', '', 1)
+                        line = line.replace(',', '.', 2)
                 outfile.write(line)
 
-        # Read the fixed CSV file using numpy
-        data = np.genfromtxt(output_file, delimiter=";", dtype=None, names=True, encoding='ISO-8859-1')
-        
+    # Process baseline file if required
+    if base_line:
+        output_baseline_file = base_line_path.replace('.csv', '_fixed.csv')
+        process_file(base_line_path, output_baseline_file)
+        data_base = np.genfromtxt(output_baseline_file, delimiter=";", dtype=None, names=True, encoding='ISO-8859-1')
+
+    # Process the input file
+    output_file = path.replace('.csv', '_fixed.csv')
+    process_file(path, output_file)
+    data = np.genfromtxt(output_file, delimiter=";", dtype=None, names=True, encoding='ISO-8859-1')
+
+    if base_line:
+        # Ensure the data lengths match
+        if len(data) != len(data_base):
+            raise ValueError("Data and baseline files have mismatched lengths.")
+
+        # Subtract the baseline from the data for each field
+        adjusted_data = np.zeros_like(data)
+        adjusted_data['nm'] = data['nm']
+        adjusted_data['A'] = data['A'] - data_base['A']
+        return adjusted_data
+    else:
         return data
-    
-    elif base_line==True:
-        #done for base line
-        base_line_file = base_line_path
-        output_baseline_file = base_line_file.replace('.csv','_fixed.csv')
-        
-        with open(base_line_file, "r") as infile_base, open(output_baseline_file, "w") as outfile_base:
-            for i, line in enumerate(infile_base):
-                # For the first line, replace the first comma with a semicolon
-                if i == 0:
-                    line = line.replace(",", ";", 1)
-                    line = line.replace(' ', '',1)
-                else:
-                    # For other lines, replace the second comma with a semicolon
-                    parts = line.split(",")
-                    if len(parts) > 2:
-                        line = ",".join(parts[:2]) + ";" + ",".join(parts[2:])
-                        line = line.replace(' ', '',1)
-                        line = line.replace(',','.',2)
-                outfile_base.write(line)
-        
-        data_base = np.genfromtxt(output_baseline_file, delimiter=";", dtype = None, names=True, encoding='ISO-8859-1')
-
-        input_file = path  # Original CSV file path
-        output_file = path.replace('.csv','_fixed.csv')  # Fixed CSV file path
-
-        # Process the file to fix delimiters and remove commas in numbers
-        with open(input_file, "r") as infile, open(output_file, "w") as outfile:
-            for i, line in enumerate(infile):
-                # For the first line, replace the first comma with a semicolon
-                if i == 0:
-                    line = line.replace(",", ";", 1)
-                    line = line.replace(' ', '',1)
-                else:
-                    # For other lines, replace the second comma with a semicolon
-                    parts = line.split(",")
-                    if len(parts) > 2:
-                        line = ",".join(parts[:2]) + ";" + ",".join(parts[2:])
-                        line = line.replace(' ', '',1)
-                        line = line.replace(',','.',2)
-                outfile.write(line)
-
-        # Read the fixed CSV file using numpy
-        data = np.genfromtxt(output_file, delimiter=";", dtype=None, names=True, encoding='ISO-8859-1')
-
-        data_ad = data - data_base
-        return data_ad
-
-
 
 
 if __name__ == '__main__':
     data_0 = read_csv("Data/20-11-2024/DEAB air_base.Sample.Raw.csv",base_line = True, base_line_path="Data/20-11-2024/AC_base.Sample.Raw.csv")
     data_5min = read_csv("Data/20-11-2024/DEAB air_base 5min 365nm.Sample.Raw.csv",base_line = True, base_line_path="Data/20-11-2024/AC_base.Sample.Raw.csv")
-    # data_10min = read_csv('Data\\13-11-24\\aB 50uM 10min 365nm.Sample.Raw.csv')
-    # data_15min = read_csv('Data\\13-11-24\\aB 50uM 15min 365nm.Sample.Raw.csv')
+    data_10min = read_csv('Data/20-11-2024/AC_base.Sample.Raw.csv')
+    data_15min = read_csv('Data/20-11-2024/DEAB air_base.Sample.Raw.csv')
     # data_45min = read_csv('Data\\13-11-24\\aB 50uM 45min 365nm.Sample.Raw.csv')
     # data_60min = read_csv('Data\\13-11-24\\aB 50um 60min 365nm.Sample.Raw.csv')
 
     plt.plot(data_0['nm'], data_0['A'], label='0 min', color='blue')  # Plot data_0
     plt.plot(data_5min['nm'], data_5min['A'], label='5 min', color='green')  # Plot data_5min
-    # plt.plot(data_10min['nm'], data_10min['A'], label='10 min', color='red')  # Plot data_10min
-    # plt.plot(data_15min['nm'], data_15min['A'], label='15 min', color='orange')  # Plot data_15min
+    plt.plot(data_10min['nm'], data_10min['A'], label='solvent', color='red')  # Plot data_10min
+    plt.plot(data_15min['nm'], data_15min['A'], label='base with out correction', color='orange')  # Plot data_15min
     # plt.plot(data_45min['nm'], data_45min['A'], label='45 min', color='purple')  # Plot data_45min
     # plt.plot(data_60min['nm'], data_60min['A'], label='60 min', color='brown')  # Plot data_60min
 
