@@ -1,0 +1,2 @@
+﻿WE(1).Potential (V)	WE(1).Current (A)	Time (s)	Scan	Column 5 (V/s)
+				0.075
