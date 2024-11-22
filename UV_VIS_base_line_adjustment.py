@@ -78,19 +78,19 @@ def read_csv(path, base_line = False, base_line_path = None):
 
 
 if __name__ == '__main__':
-    data_0 = read_csv("Data\\13-11-24\\azobenzene 50uM.Sample.Raw.csv")
-    data_5min = read_csv('Data\\13-11-24\\aB 50uM 5min 365nm.Sample.Raw.csv')
-    data_10min = read_csv('Data\\13-11-24\\aB 50uM 10min 365nm.Sample.Raw.csv')
-    data_15min = read_csv('Data\\13-11-24\\aB 50uM 15min 365nm.Sample.Raw.csv')
-    data_45min = read_csv('Data\\13-11-24\\aB 50uM 45min 365nm.Sample.Raw.csv')
-    data_60min = read_csv('Data\\13-11-24\\aB 50um 60min 365nm.Sample.Raw.csv')
+    data_0 = read_csv("Data/20-11-2024/DEAB air_base.Sample.Raw.csv",base_line = True, base_line_path="Data/20-11-2024/AC_base.Sample.Raw.csv")
+    data_5min = read_csv("Data/20-11-2024/DEAB air_base 5min 365nm.Sample.Raw.csv",base_line = True, base_line_path="Data/20-11-2024/AC_base.Sample.Raw.csv")
+    # data_10min = read_csv('Data\\13-11-24\\aB 50uM 10min 365nm.Sample.Raw.csv')
+    # data_15min = read_csv('Data\\13-11-24\\aB 50uM 15min 365nm.Sample.Raw.csv')
+    # data_45min = read_csv('Data\\13-11-24\\aB 50uM 45min 365nm.Sample.Raw.csv')
+    # data_60min = read_csv('Data\\13-11-24\\aB 50um 60min 365nm.Sample.Raw.csv')
 
     plt.plot(data_0['nm'], data_0['A'], label='0 min', color='blue')  # Plot data_0
     plt.plot(data_5min['nm'], data_5min['A'], label='5 min', color='green')  # Plot data_5min
-    plt.plot(data_10min['nm'], data_10min['A'], label='10 min', color='red')  # Plot data_10min
-    plt.plot(data_15min['nm'], data_15min['A'], label='15 min', color='orange')  # Plot data_15min
-    plt.plot(data_45min['nm'], data_45min['A'], label='45 min', color='purple')  # Plot data_45min
-    plt.plot(data_60min['nm'], data_60min['A'], label='60 min', color='brown')  # Plot data_60min
+    # plt.plot(data_10min['nm'], data_10min['A'], label='10 min', color='red')  # Plot data_10min
+    # plt.plot(data_15min['nm'], data_15min['A'], label='15 min', color='orange')  # Plot data_15min
+    # plt.plot(data_45min['nm'], data_45min['A'], label='45 min', color='purple')  # Plot data_45min
+    # plt.plot(data_60min['nm'], data_60min['A'], label='60 min', color='brown')  # Plot data_60min
 
 
     max_y_value = np.max(data_0['A'])
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     time = [0,5,10,15,45,60]
     # Collect maximum absorbance values at each time point
-    abs_max = [np.max(data_0["A"]), np.max(data_5min["A"]), np.max(data_10min["A"]),np.max(data_15min["A"]), np.max(data_45min["A"]), np.max(data_60min["A"])]
+    abs_max = [np.max(data_0["A"])]#, np.max(data_5min["A"]), np.max(data_10min["A"]),np.max(data_15min["A"]), np.max(data_45min["A"]), np.max(data_60min["A"])]
 
     def exponential_decay(t, A, B, C):
         return A * np.exp(-B * t) + C
